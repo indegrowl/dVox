@@ -22,7 +22,11 @@ impl<S: 'static, FS: FnMut(&mut Context) -> S, F: FnMut(&mut S, &mut Context)> A
             .create_window(WindowAttributes::default())
             .expect("Unable to create window!");
         self.context = Some(Context::new(window));
-        self.state = Some((self.setup)(self.context.as_mut().expect("setup was called without context")));
+        self.state = Some((self.setup)(
+            self.context
+                .as_mut()
+                .expect("setup was called without context"),
+        ));
     }
 
     fn window_event(
@@ -35,12 +39,19 @@ impl<S: 'static, FS: FnMut(&mut Context) -> S, F: FnMut(&mut S, &mut Context)> A
             WindowEvent::CloseRequested => {
                 event_loop.exit();
             }
-            WindowEvent::RedrawRequested => (self.draw)(
-                self.state.as_mut().expect("draw was called without state"),
+            WindowEvent::RedrawRequested => {
+                (self.draw)(
+                    self.state.as_mut().expect("draw was called without state"),
+                    self.context
+                        .as_mut()
+                        .expect("draw was called without context"),
+                );
                 self.context
-                    .as_mut()
-                    .expect("draw was called without context"),
-            ),
+                    .as_ref()
+                    .expect("Should panic before this line")
+                    .window
+                    .request_redraw();
+            }
             _ => (),
         }
     }
