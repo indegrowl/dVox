@@ -3,5 +3,17 @@ name = "dvox"
 version = "0.1.0"
 edition = "2024"
 
+[workspace]
+resolver = "3"
+members = ["crates/app"]
+
+[workspace.dependencies]
+glam = "0.33.11"
+puffin = "0.20.0"
+tracing = "0.1.44"
+wgpu = "30.0.1"
+winit = "0.30.13"
+app = { path = "crates/app" }
+
 [dependencies]
-bevy = { version = "0.19.1", features = ["free_camera"] }
+app.workspace = true
