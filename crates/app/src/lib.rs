@@ -29,6 +29,12 @@ impl<S: 'static, FS: FnMut(&mut Context) -> S, F: FnMut(&mut S, &mut Context)> A
         ));
     }
 
+    fn about_to_wait(&mut self, _: &winit::event_loop::ActiveEventLoop) {
+        if let Some(context) = self.context.as_ref() {
+            context.window.request_redraw()
+        }
+    }
+
     fn window_event(
         &mut self,
         event_loop: &winit::event_loop::ActiveEventLoop,
@@ -46,11 +52,6 @@ impl<S: 'static, FS: FnMut(&mut Context) -> S, F: FnMut(&mut S, &mut Context)> A
                         .as_mut()
                         .expect("draw was called without context"),
                 );
-                self.context
-                    .as_ref()
-                    .expect("Should panic before this line")
-                    .window
-                    .request_redraw();
             }
             _ => (),
         }
