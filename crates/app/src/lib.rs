@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use winit::{
     application::ApplicationHandler,
     event::WindowEvent,
@@ -5,12 +7,18 @@ use winit::{
     window::{Window, WindowAttributes},
 };
 
+mod renderer;
+use renderer::*;
+
 pub struct Context {
-    window: Window,
+    window: Arc<Window>,
+    renderer: Renderer,
 }
 impl Context {
     pub fn new(window: Window) -> Self {
-        Self { window }
+        let window = Arc::new(window);
+        let renderer = Renderer::new(window.clone());
+        Self { window, renderer }
     }
 }
 
@@ -46,12 +54,29 @@ impl<S: 'static, FS: FnMut(&mut Context) -> S, F: FnMut(&mut S, &mut Context)> A
                 event_loop.exit();
             }
             WindowEvent::RedrawRequested => {
+                self.context
+                    .as_mut()
+                    .expect("draw was called without context")
+                    .renderer
+                    .begin_frame();
+
                 (self.draw)(
                     self.state.as_mut().expect("draw was called without state"),
                     self.context
                         .as_mut()
                         .expect("draw was called without context"),
                 );
+
+                self.context
+                    .as_mut()
+                    .expect("draw was called without context")
+                    .renderer
+                    .end_frame();
+            }
+            WindowEvent::Resized(size) => {
+                if let Some(context) = self.context.as_mut() {
+                    context.renderer.resize(size.width, size.height);
+                }
             }
             _ => (),
         }

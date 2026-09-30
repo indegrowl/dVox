@@ -13,6 +13,7 @@ puffin = "0.20.0"
 tracing = "0.1.44"
 wgpu = "30.0.1"
 winit = "0.30.13"
+pollster = "1.0.1"
 app = { path = "crates/app" }
 
 [dependencies]
